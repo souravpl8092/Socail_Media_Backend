@@ -2,8 +2,39 @@ const express = require("express");
 const { PostModel } = require("../models/Post.model");
 const postRouter = express.Router();
 
-postRouter.get("/", (req, res) => {
-  res.send("All the posts");
+postRouter.get("/", async (req, res) => {
+  const device_search = req.query.device;
+  const device1_search = req.query.device1;
+  const device2_search = req.query.device2;
+  if (device_search) {
+    try {
+      const posts = await PostModel.find({ device: device_search });
+      res.send(posts);
+    } catch (error) {
+      console.log(err);
+      res.send({ err: "Something went wrong" });
+    }
+  } else if (device1_search && device2_search) {
+    try {
+      const posts = await PostModel.find({
+        $and: [{ device: device1_search }, { device: device2_search }],
+      });
+      res.send(posts);
+    } catch (error) {
+      console.log(err);
+      res.send({ err: "Something went wrong" });
+    }
+  } else {
+    let query = req.query;
+    try {
+      const posts = await PostModel.find(query);
+      res.send(posts);
+    } catch (error) {
+      console.log(err);
+      res.send({ err: "Something went wrong" });
+    }
+  }
+  //res.send("All the posts");
 });
 
 postRouter.post("/create", async (req, res) => {

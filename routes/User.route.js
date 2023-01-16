@@ -6,13 +6,18 @@ const jwt = require("jsonwebtoken");
 const userRouter = express.Router();
 
 userRouter.post("/register", async (req, res) => {
-  const { name, email, pass, age } = req.body;
+  const { name, email, password, gender } = req.body;
   try {
-    bcrypt.hash(pass, 5, async (err, secure_password) => {
+    bcrypt.hash(password, 5, async (err, secure_password) => {
       if (err) {
         console.log(err);
       } else {
-        const user = new UserModel({ name, email, pass: secure_password, age });
+        const user = new UserModel({
+          name,
+          email,
+          password: secure_password,
+          gender,
+        });
         await user.save();
         res.send("Registered");
       }
@@ -24,12 +29,12 @@ userRouter.post("/register", async (req, res) => {
 });
 
 userRouter.post("/login", async (req, res) => {
-  const { email, pass } = req.body;
+  const { email, password } = req.body;
   try {
     const user = await UserModel.find({ email });
-    const hashed_pass = user[0].pass;
+    const hashed_password = user[0].password;
     if (user.length > 0) {
-      bcrypt.compare(pass, hashed_pass, (err, result) => {
+      bcrypt.compare(password, hashed_password, (err, result) => {
         if (result) {
           const token = jwt.sign({ userID: user[0]._id }, "masai");
           res.send({ msg: "Login Successfull", token: token });
